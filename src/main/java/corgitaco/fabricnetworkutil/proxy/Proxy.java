@@ -1,13 +1,13 @@
 package corgitaco.fabricnetworkutil.proxy;
 
-import net.minecraft.network.FriendlyByteBuf;
+import corgitaco.fabricnetworkutil.Packet;
+import corgitaco.fabricnetworkutil.PacketDeserializer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 public sealed interface Proxy permits ClientProxy, ServerProxy {
 
-    <T> void register(ResourceLocation resourceLocation, Function<FriendlyByteBuf, T> function, BiConsumer<T, Level> consumer);
+    <T extends Packet> void register(ResourceLocation resourceLocation, PacketDeserializer<T> deserializer, BiConsumer<T, Level> consumer);
 }

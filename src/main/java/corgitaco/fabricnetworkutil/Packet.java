@@ -4,7 +4,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.Level;
 
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 public interface Packet {
 
@@ -12,6 +11,6 @@ public interface Packet {
 
     void handle(Level level);
 
-    record Handler<T extends Packet>(Class<T> clazz, BiConsumer<T, FriendlyByteBuf> write, Function<FriendlyByteBuf, T> read, BiConsumer<T, Level> handle) {
+    record Handler<T extends Packet>(Class<T> clazz, PacketSerializer<T> serializer, PacketDeserializer<T> deserializer, BiConsumer<T, Level> handle) {
     }
 }

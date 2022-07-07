@@ -1,7 +1,6 @@
 package corgitaco.fabricnetworkutil.proxy;
 
-import corgitaco.fabricnetworkutil.FabricNetworkHandler;
-import corgitaco.fabricnetworkutil.FabricNetworkUtil;
+import corgitaco.fabricnetworkutil.*;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
@@ -11,7 +10,6 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 public final class ServerProxy implements Proxy {
     public static final ServerProxy SERVER_PROXY = new ServerProxy();
@@ -20,10 +18,10 @@ public final class ServerProxy implements Proxy {
     }
 
     @Override
-    public <T> void register(ResourceLocation resourceLocation, Function<FriendlyByteBuf, T> function, BiConsumer<T, Level> consumer) {
+    public <T extends Packet> void register(ResourceLocation resourceLocation, PacketDeserializer<T> deserializer, BiConsumer<T, Level> consumer) {
         ServerPlayNetworking.registerGlobalReceiver(resourceLocation, (server, player, handler, buf, responseSender) -> {
 
-            T packet = function.apply(buf);
+            T packet = deserializer.apply(buf);
 
             server.execute(() -> {
                 try {
@@ -37,18 +35,18 @@ public final class ServerProxy implements Proxy {
         });
     }
 
-    public static <T> void sendToPlayer(FabricNetworkHandler handler, ServerPlayer player, T packet) {
+    public static <T extends Packet> void sendToPlayer(FabricNetworkHandler handler, ServerPlayer player, T packet) {
         var pair = handler.getPair(packet.getClass());
 
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
 
         //noinspection unchecked
-        ((BiConsumer<T, FriendlyByteBuf>) pair.right()).accept(packet, buf);
+        ((PacketSerializer<T>) pair.right()).accept(packet, buf);
 
         ServerPlayNetworking.send(player, pair.left(), buf);
     }
 
-    public static <T> void sendToPlayers(FabricNetworkHandler handler, List<ServerPlayer> list, T packet) {
+    public static <T extends Packet> void sendToPlayers(FabricNetworkHandler handler, List<ServerPlayer> list, T packet) {
         list.forEach(player -> sendToPlayer(handler, player, packet));
     }
 }

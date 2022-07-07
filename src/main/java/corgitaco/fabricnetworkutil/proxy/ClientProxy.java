@@ -1,8 +1,6 @@
 package corgitaco.fabricnetworkutil.proxy;
 
-import corgitaco.fabricnetworkutil.FabricNetworkHandler;
-import corgitaco.fabricnetworkutil.FabricNetworkUtil;
-import corgitaco.fabricnetworkutil.Packet;
+import corgitaco.fabricnetworkutil.*;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -12,7 +10,6 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 public final class ClientProxy implements Proxy {
     public static final ClientProxy CLIENT_PROXY = new ClientProxy();
@@ -21,13 +18,13 @@ public final class ClientProxy implements Proxy {
     }
 
     @Override
-    public <T> void register(ResourceLocation resourceLocation, Function<FriendlyByteBuf, T> function, BiConsumer<T, Level> consumer) {
+    public <T extends Packet> void register(ResourceLocation resourceLocation, PacketDeserializer<T> deserializer, BiConsumer<T, Level> consumer) {
         ClientPlayNetworking.registerGlobalReceiver(resourceLocation, (client, handler, buf, responseSender) -> {
 
             @Nullable
             ClientLevel level = client.level;
 
-            T packet = function.apply(buf);
+            T packet = deserializer.apply(buf);
 
             client.execute(() -> {
                 if (level != null) {
@@ -49,7 +46,7 @@ public final class ClientProxy implements Proxy {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
 
         //noinspection unchecked
-        ((BiConsumer<T, FriendlyByteBuf>) pair.right()).accept(packet, buf);
+        ((PacketSerializer<T>) pair.right()).accept(packet, buf);
 
         ClientPlayNetworking.send(pair.left(), buf);
     }
