@@ -1,6 +1,9 @@
 package corgitaco.fabricnetworkutil.proxy;
 
+import corgitaco.fabricnetworkutil.FabricNetworkHandler;
 import corgitaco.fabricnetworkutil.FabricNetworkUtil;
+import corgitaco.fabricnetworkutil.Packet;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.FriendlyByteBuf;
@@ -38,5 +41,16 @@ public final class ClientProxy implements Proxy {
                 }
             });
         });
+    }
+
+    public static <T extends Packet> void send(FabricNetworkHandler handler, T packet) {
+        var pair = handler.getPair(packet.getClass());
+
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+
+        //noinspection unchecked
+        ((BiConsumer<T, FriendlyByteBuf>) pair.right()).accept(packet, buf);
+
+        ClientPlayNetworking.send(pair.left(), buf);
     }
 }
