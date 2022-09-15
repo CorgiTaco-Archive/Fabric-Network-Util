@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class FabricNetworkHandler {
+public class FabricS2CNetworkHandler {
     public static final Logger LOGGER = LogManager.getLogger();
 
 
