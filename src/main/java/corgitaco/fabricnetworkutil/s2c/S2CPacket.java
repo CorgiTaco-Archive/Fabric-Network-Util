@@ -1,4 +1,4 @@
-package corgitaco.fabricnetworkutil;
+package corgitaco.fabricnetworkutil.s2c;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.Level;

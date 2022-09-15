@@ -1,4 +1,4 @@
-package corgitaco.fabricnetworkutil;
+package corgitaco.fabricnetworkutil.s2c;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
